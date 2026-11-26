@@ -1,0 +1,78 @@
+Review notes on the machine-learning forecasting extension
+
+NasirAldeen’s revised related-work draft (Sections 2.2.10 and 2.3) proposes using recorded building-load data to forecast near-term demand and estimate how much power will be available for EV charging. Compare the learned forecast with a simple persistence forecast or a building-specific load profile. The draft leaves the model choice open.
+
+The objective is to test both forecast accuracy and whether forecast-assisted allocation reduces the energy shortfall at departure for the two vehicles. Use the same load and charging scenarios to compare equal sharing, urgency-based allocation, and forecast-assisted scheduling. Use current load measurements to enforce the site limit at every control step. The low-voltage bench demonstrates shared-supply allocation.
+
+Source: https://github.com/NasirAldeen/two-port-ev-charging-senior-project/blob/main/drafts/EV%20Charging%20Related%20Work%20-%20Revised%20with%20ML.docx
+
+Chapter 1 Introduction
+
+In the 1800s riding to the next town started with buckling a harness. A horse or mule would pull the carriage and the trip would require a significant amount of time and effort that could be used to plan the day around. The introduction of the motor car did not change the distance between the towns but did change the means of transportation between them. A trip that used to require significant effort and time could now be integrated into a daily routine.
+
+As the motor car started to be integrated into everyday life, technology and engineering advances started to follow. The cars started to become safer, more comfortable and faster. The power source that the vehicles used started to change as well. Hybrid vehicles began to include electric motors in everyday vehicles. Plug in hybrids and all electric vehicles now allow a user to plug in the vehicle, walk away and return to a vehicle with increased energy for the next trip. The charging location of the vehicle has now become part of the power source for the vehicle.
+
+This connection between where a vehicle is parked and how it receives energy led to a problem in a residential building that brought us to this project. The building has several apartments and a taxi office. The taxi office has an EV charger for its vehicles, while one of the residents has another charger for his own vehicle. The two chargers use the same electrical supply that powers the apartments’ air conditioners, refrigerators, lighting and other appliances. Problems appeared when both vehicles were charging at the same time, adding their charging demand to the building’s existing load and raising its peak demand. According to the account shared with us, the building owner has a contracted supply capacity agreed with the electricity distribution company. The supply fuse had blown several times during periods of simultaneous charging, interrupting power to the building. This raised a question about how the two vehicles could receive the energy they needed while keeping the combined demand within the site’s electrical limit.
+
+This project focuses on the design of a two-port electric vehicle (EV) charging station that is aware of the power available on a site and can make a power allocation decision based on changing building power demand. The power allocation to the two vehicles will be adjusted such that the total power used by the building and both charging ports remains at or below a defined site limit. Each charging port also has a power limit that determines the maximum power that can be allocated to that charging port even if there is excess power available on the site. Different methods of allocating power will be compared based on the amount of requested energy that is delivered to each vehicle prior to departure.
+
+1.1 Problem Statement and Purpose
+
+When two electric vehicles charge from the same supply as a building, the power available for charging changes as the building’s other loads turn on and off. Both vehicles may need energy at the same time, but they may need different amounts and their drivers may leave at different times. The charger must account for these requests while keeping the combined demand within the site’s electrical limit and respecting the limit of each charging port.
+
+Dividing the available power equally provides a simple way to serve both vehicles. However, an equal split may leave a vehicle short of its requested energy when its driver leaves earlier. Giving priority to the more urgent vehicle could reduce that shortfall, but it also changes how much energy the other vehicle receives. A predictive scheduler could use estimates of future building demand and departure times to plan the allocation. Whether that planning helps depends partly on how accurate those estimates are.
+
+The objective is to test whether forecasting building demand helps the two-port charger deliver more of each vehicle’s requested energy before departure compared with equal sharing and a capable urgency-based method. The forecast helps plan the allocation ahead of time. The controller still uses actual load measurements to enforce the site power limit at each control step. The comparison will use the same charging requests, building load profiles, and electrical limits. It will also include forecast errors, earlier-than-expected departures, and requests that exceed what the available supply can deliver.
+
+We will study this problem through simulation and a low-voltage laboratory model with two independently controlled DC–DC channels. An embedded controller will regulate the channels and enforce local current limits and shutdown, while a supervisory controller will determine how much power each channel can receive. Emulated charging loads will represent the two vehicles. The laboratory scope excludes direct connection to real vehicles or the utility grid, bidirectional charging, and battery-health estimation.
+
+1.2 Project and Design Objectives
+
+The main objective is to design and evaluate a two-port charging model that responds to changing building demand while sharing the available power between two charging requests. The specific objectives are to:
+
+1. Develop a reproducible simulation model. Model two charging sessions with defined energy requests and departure times, together with changing building demand. Calculate the available charging power from the site limit while accounting for conversion losses and a safety margin.
+
+2. Implement three power allocation strategies. Develop equal sharing, urgency-based allocation, and predictive scheduling. Compare them using identical requests and constraints, with future loads and actual departure times hidden from the controllers until they become available.
+
+3. Evaluate the benefit of forecasting. Test whether planning ahead reduces energy shortfall at departure compared with the other strategies. Use actual load measurements to constrain the charging power at each control step, and measure how forecast errors affect energy delivery.
+
+4. Design and build two independently regulated channels. Implement two low-voltage DC–DC channels with voltage and current sensing, current limiting, and local shutdown. Check how closely each channel follows its assigned command and how it responds when that command changes.
+
+5. Evaluate energy delivery before departure. Record the energy delivered to each load, the remaining energy shortfall at departure, the proportion of requests completed, and how the allocation affects the service received by each port.
+
+6. Test performance under uncertainty and limited capacity. Apply load forecast errors and changes in departure time using paired scenarios with the same error conditions across strategies. Identify requests that cannot be completed within the available capacity and report them separately from failures of the allocation method.
+
+7. Verify the response to changes in building demand. Measure site-limit violation magnitude and duration, channel regulation error, response time, and conversion efficiency using measured input power. Compare selected hardware results with the corresponding simulation cases.
+
+1.3 Intended Outcomes and Deliverables
+
+The intended outcome is an evidence-based comparison of how the three allocation strategies use a shared power supply. The study should show when forecasting helps deliver more of the requested energy before departure, how forecast errors affect that benefit, and what happens to each vehicle when the available capacity is insufficient. The results will also show how closely the laboratory channels follow the scheduler’s commands and maintain the site power limit as measured building demand changes.
+
+By the end of Senior Project I, we aim to produce:
+
+- A defined set of requirements, operating limits, assumptions, and performance measures.
+- A review of related work and a justified selection of the proposed architecture and allocation methods.
+- A simulator with reproducible charging requests and building load scenarios, together with preliminary strategy comparisons.
+- A proposed hardware design, component list, resource and cost estimate, and a plan for testing the two channels.
+- A report documenting the design decisions, analysis completed, and work remaining for Senior Project II.
+
+By the end of Senior Project II, the planned deliverables are:
+
+- A working low-voltage prototype with two independently controlled charging channels and emulated vehicle loads.
+- Schematics, embedded firmware, and supervisory software implementing the allocation strategies and measurement-based power limits.
+- A monitoring interface and experiment logs showing power, delivered energy, and controller responses.
+- Measured comparisons under load changes, forecast errors, altered departure times, and insufficient-capacity cases.
+- A final report assessing the objectives against the simulation and experimental evidence, with recommendations for further development.
+
+1.4 Summary of Report Structure
+
+Chapter 1 introduces the problem that led to the project and defines its purpose, objectives, and intended deliverables. Chapter 2 presents the theoretical background and reviews related work on EV charging and power allocation. Chapter 3 describes the proposed system, design specifications, applicable standards, constraints, alternatives, and methods used for analysis and testing.
+
+Chapter 4 will present the simulation and experimental results and discuss their implications. Chapter 5 covers project management, including the schedule, resources, costs, and lessons learned. Chapter 6 examines the economic, societal, environmental, and ethical impacts of the proposed solution. Chapter 7 will summarize the achievements against the project objectives, describe the skills gained, and recommend further work.
+
+
+Draft status note supplied by the user
+
+The opening introduction has been humanized. The user reports a ZeroGPT result of 11.9% AI.
+Sections 1.1–1.4 have not been humanized yet. The user reports a ZeroGPT result of 100% AI for these parts.
+These scores were reported by the user and were not independently checked for this saved file.
